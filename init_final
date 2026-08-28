@@ -1,0 +1,33 @@
+#!/bin/sh
+# CloudLTE-Snapdragon init — AI 聊天终端 + SSH
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+echo ''
+echo '================================='
+echo '  CloudLTE-Snapdragon AI 终端'
+echo '  (Linux 5.4 MSM8916 + BusyBox)'
+echo '================================='
+
+# SSH 服务器 (dropbear, 密钥认证)
+echo '[SSH] 启动 dropbear (22 端口)...'
+mkdir -p /etc/dropbear
+/usr/sbin/dropbear -r /etc/dropbear/host_rsa_key -r /etc/dropbear/host_ed25519_key -p 22 2>/dev/null &
+# 生成密钥 (首次)
+if [ ! -f /etc/dropbear/host_rsa_key ]; then
+  /usr/sbin/dropbearkey -t rsa -s 2048 -f /etc/dropbear/host_rsa_key 2>/dev/null
+  /usr/sbin/dropbearkey -t ed25519 -f /etc/dropbear/host_ed25519_key 2>/dev/null
+fi
+
+# 内置 Web 服务器 (聊天 UI)
+echo '[WEB] 启动内置 Web 服务 (80 端口)...'
+cd /www
+busybox httpd -p 80 -h /www -f &
+
+IP=$(ifconfig 2>/dev/null | grep -oE 'inet [0-9.]+' | grep -v 127 | head -1 | cut -d' ' -f2)
+echo "[WEB] 聊天界面: http://$IP  (配置 DeepSeek Key 后使用)"
+echo "[SSH] SSH 登录: ssh root@$IP (密钥认证)"
+echo 'Booting... init OK'
+echo ''
+exec /bin/sh

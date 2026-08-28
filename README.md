@@ -80,3 +80,18 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j4
 ## 许可证
 
 GPL-3.0 © Cloud LTE Studio
+
+## v1.1 — SSH + 聊天 WebUI 完整版
+
+新增:
+- **Dropbear SSH** (ARM64 静态, 22 端口, 密钥认证)
+- **聊天 WebUI** (web/index.html, 浏览器直连 DeepSeek API)
+- 完整 initramfs: `snap_initramfs_ssh.gz` (1.8MB, 含 SSH+Web+聊天)
+- init 自动启动 SSH + Web 服务
+
+使用:
+1. 刷入系统 → 开机
+2. 浏览器访问 http://设备IP → 点 ⚙️ 配置 DeepSeek Key
+3. SSH: ssh root@设备IP (密钥认证)
+
+文件: `snap_initramfs_ssh.gz` (完整系统) / `dropbear_arm64` (SSH 二进制) / `init_full` (启动脚本)
